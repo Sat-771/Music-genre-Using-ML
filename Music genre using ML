@@ -1,0 +1,151 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import random
+
+import warnings
+warnings.filterwarnings("ignore")
+
+df = pd.read_csv("/kaggle/input/edm-music-genres/train_data_final.csv")
+df.head()
+df.tail()
+df.columns
+df["label"].unique()
+df.info()
+df.describe()
+
+sns.set(style='darkgrid')
+
+plt.figure(figsize=(25, 4))
+sns.countplot(x='label', data=df)
+plt.title('Count of Genres')
+plt.xlabel('Genres')
+plt.ylabel('Count')
+
+plt.show()
+
+sns.set_style("darkgrid")
+
+num_features = len(df.columns[:-1])
+plots_per_row = 5
+
+num_rows = (num_features + plots_per_row - 1) // plots_per_row
+
+selected_genres = ["ambient", "future_garage_wave_trap", "lofi", "synthwave"]
+df_selected = df[df['label'].isin(selected_genres)]
+palette = sns.color_palette("husl", len(selected_genres))
+
+fig, axes = plt.subplots(num_rows, plots_per_row, figsize=(20, 4*num_rows))
+axes = axes.flatten()
+
+for i, col in enumerate(df.columns[:-1]):
+    for j, genre in enumerate(selected_genres):
+        sns.kdeplot(df_selected.loc[df_selected['label'] == genre, col], shade=True, label=genre, color=palette[j], ax=axes[i])
+    axes[i].set_xlabel(col)
+    axes[i].set_ylabel('Density')
+    axes[i].legend(title='Genre', fontsize='small')
+    axes[i].set_title(f"KDE Plot of {col}")
+
+for i in range(num_rows * plots_per_row):
+    if i >= num_features:
+        fig.delaxes(axes[i])
+
+plt.tight_layout()
+plt.show()
+
+sns.set_style("darkgrid")
+selected_genres = ["dnb", "dubstep", "trap","phonk"]
+palette = sns.color_palette("husl", len(selected_genres))
+df_selected = df[df['label'].isin(selected_genres)]
+
+fig, axes = plt.subplots(num_rows, plots_per_row, figsize=(20, 4*num_rows))
+axes = axes.flatten()
+
+for i, col in enumerate(df.columns[:-1]):
+    for j, genre in enumerate(selected_genres):
+        sns.kdeplot(df_selected.loc[df_selected['label'] == genre, col], shade=True, label=genre, color=palette[j], ax=axes[i])
+    axes[i].set_xlabel(col)
+    axes[i].set_ylabel('Density')
+    axes[i].legend(title='Genre', fontsize='small')
+    axes[i].set_title(f"KDE Plot of {col}")
+
+for i in range(num_rows * plots_per_row):
+if i >= num_features:
+        fig.delaxes(axes[i])
+
+plt.tight_layout()
+plt.show()
+sns.set_style("darkgrid")
+
+#For 4/4 genres
+selected_genres = ["house", "trance", "psytrance", "techno", "moombahton_reggaeton", "big_room_house"]
+palette = sns.color_palette("husl", len(selected_genres))
+df_selected = df[df['label'].isin(selected_genres)]
+
+fig, axes = plt.subplots(num_rows, plots_per_row, figsize=(20, 4*num_rows))
+axes = axes.flatten()
+
+for i, col in enumerate(df.columns[:-1]):
+    for j, genre in enumerate(selected_genres):
+        sns.kdeplot(df_selected.loc[df_selected['label'] == genre, col], shade=True, label=genre, color=palette[j], ax=axes[i])
+    axes[i].set_xlabel(col)
+    axes[i].set_ylabel('Density')
+    axes[i].legend(title='Genre', fontsize='small')
+    axes[i].set_title(f"KDE Plot of {col}")
+
+for i in range(num_rows * plots_per_row):
+    if i >= num_features:
+        fig.delaxes(axes[i])
+
+plt.tight_layout()
+plt.show()
+
+sns.set_style("darkgrid")
+selected_genres = ["hardcore", "hardstyle"]
+palette = sns.color_palette("husl", len(selected_genres))
+df_selected = df[df['label'].isin(selected_genres)]
+
+fig, axes = plt.subplots(num_rows, plots_per_row, figsize=(20, 4*num_rows))
+axes = axes.flatten()
+
+for i, col in enumerate(df.columns[:-1]):
+    for j, genre in enumerate(selected_genres):
+        sns.kdeplot(df_selected.loc[df_selected['label'] == genre, col], shade=True, label=genre, color=palette[j], ax=axes[i])
+    axes[i].set_xlabel(col)
+    axes[i].set_ylabel('Density')
+    axes[i].legend(title='Genre', fontsize='small')
+    axes[i].set_title(f"KDE Plot of {col}")
+
+for i in range(num_rows * plots_per_row):
+    if i >= num_features:
+        fig.delaxes(axes[i])
+
+plt.tight_layout()
+plt.show()
+
+sns.set_style("darkgrid")
+
+
+features = df.columns[:-1]
+num_rows = len(features) // 2 + len(features) % 2
+palette = sns.color_palette("husl", 2)
+
+fig, axes = plt.subplots(num_rows, 1, figsize=(10, 4*num_rows))
+
+for i, feature in enumerate(features):
+    row_index = i // 2
+    col_index = i % 2
+    if feature.endswith('_mean') and feature[:-5] + '_std' in df.columns:
+        sns.kdeplot(df[feature], shade=True, label=feature[:-5], color=palette[0], ax=axes[row_index])
+        sns.kdeplot(df[feature[:-5] + '_std'], shade=True, label=feature[:-9] + '_std', color=palette[1], ax=axes[row_index])
+        axes[row_index].set_xlabel(feature[:-5])
+        axes[row_index].set_ylabel('Density')
+        axes[row_index].legend(title='Variant', fontsize='small')
+        axes[row_index].set_title(f"KDE Plot of {feature[:-5]}")
+
+plt.tight_layout()
+plt.show()
+
+
+
