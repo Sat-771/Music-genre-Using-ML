@@ -1,0 +1,173 @@
+import tensorflow as tf
+import pandas as pd 
+from PIL import Image
+import os
+import numpy as np
+import matplotlib.pyplot as plt 
+import os 
+import pathlib 
+import random
+path = '/kaggle/input/microorganism-image-classification/Micro_Organism'
+data_dir = pathlib.Path(path)
+class_names = np.array(sorted([item.name for item in data_dir.glob("*")]))
+class_names
+AmoebaPath = os.path.join(data_dir,'Amoeba')
+EuglenaPath = os.path.join(data_dir,'Euglena')
+HydraPath = os.path.join(data_dir,'Hydra')
+ParameciumPath = os.path.join(data_dir,'Paramecium')
+RodPath = os.path.join(data_dir,'Rod_bacteria')
+SphericalPath = os.path.join(data_dir,'Sprecihal_bacteria')
+SprialPath = os.path.join(data_dir,'Sprial_bacteria')
+YeastPath = os.path.join(data_dir,'Yeast')
+imageCount = len(list(data_dir.glob('*/*.jpg')))
+imageCount
+plt.figure(figsize=(15,15))
+
+for i in range(25):
+    plt.subplot(5,5,i+1)
+    random_class = random.choice(class_names)
+    img = plt.imread(random.choice(list(data_dir.glob(random_class+"/*.jpg"))))
+    plt.xticks([])
+    plt.yticks([])
+    plt.title(random_class)
+    plt.imshow(img)
+#Building CNN
+batch_size = 32
+img_height = 224
+img_width = 224
+#Seperating data sets
+from tensorflow.keras.utils import image_dataset_from_directory
+train_data = image_dataset_from_directory(
+                  data_dir,
+                  validation_split=0.2,
+                  subset="training",
+                  seed=123,
+                  image_size=(img_height, img_width),
+                  batch_size=batch_size)
+
+
+val_data = image_dataset_from_directory(data_dir,
+                                        validation_split=0.2,
+                                        subset="validation",
+                                        seed=123,
+                                        image_size=(img_height,img_width),
+                                        batch_size=batch_size)
+
+#Model defining 
+import tensorflow as tf
+from tensorflow.keras import layers, Input
+
+img_height, img_width = 224, 244  # Set your image height and width here
+
+# Define the input layer
+input_layer = Input(shape=(img_height, img_width, 3))
+
+# Define the CNN model
+model = tf.keras.Sequential([
+    input_layer,
+    layers.Rescaling(1./255),
+    
+    layers.Conv2D(16, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    
+    layers.Conv2D(32, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    
+    layers.Conv2D(64, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    
+    layers.Dropout(0.5),
+    layers.Flatten(),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(8, activation='softmax')
+])
+#Compiling model
+model.compile(optimizer="Adam",
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=["accuracy"])
+import tensorflow as tf
+from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+# Define the input shape
+img_height = 224
+img_width = 224
+
+# Define the model
+model = tf.keras.Sequential([
+    layers.Input(shape=(img_height, img_width, 3)),
+    layers.Rescaling(1./255),
+    layers.Conv2D(16, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(32, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(64, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Dropout(0.5),
+    layers.Flatten(),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(8, activation="softmax")
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# Generate some random data for demonstration purposes
+num_samples = 1000
+x_train = np.random.rand(num_samples, img_height, img_width, 3)
+y_train = np.random.randint(8, size=num_samples)
+x_test = np.random.rand(num_samples, img_height, img_width, 3)
+y_test = np.random.randint(8, size=num_samples)
+
+# Split the data into training and validation sets
+x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
+
+# Train the model
+epochs = 2
+history = model.fit(x_train, y_train, epochs=epochs, validation_data=(x_val, y_val), batch_size=32)
+
+model.evaluate(val_data)
+history.history.keys()
+model.summary()
+#Plotting accuracy and loss
+acc = history.history['accuracy']
+val_acc =  history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8,8))
+plt.subplot(1,2,1)
+plt.plot(epochs_range,acc,label='Accuracy')
+plt.plot(epochs_range,val_acc,label="Validation Accuracy")
+plt.legend()
+
+plt.subplot(1,2,2)
+plt.plot(epochs_range,loss,label='Loss')
+plt.plot(epochs_range,val_loss,label="Validation Loss")
+plt.legend()
+plt.show()
+
+#predictions
+plt.figure(figsize=(15, 15))
+class_names = val_data.class_names
+result = ' | False'
+for images, labels in val_data.take(1):
+    for i in range(25):
+        
+        ax = plt.subplot(5, 5, i + 1)
+        img = images[i].numpy().astype("uint8")
+        img = tf.expand_dims(img, axis=0)
+        
+        predictions = model.predict(img)
+        predicted_class = np.argmax(predictions)
+        if class_names[predicted_class] == class_names[labels[i]]:
+            result = ' | TRUE'
+            
+        plt.imshow(images[i].numpy().astype("uint8"))
+        plt.title(class_names[predicted_class]+result  )
+        plt.axis("off")
+
